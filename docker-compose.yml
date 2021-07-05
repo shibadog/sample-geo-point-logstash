@@ -1,0 +1,31 @@
+version: 3.7"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+    container_name: elasticsearch
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment: 
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.3
+    ports:
+      - 5601:5601
+    links: 
+      - elasticsearch
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.8.6
+    volumes: 
+      - ./logstash.d/pipeline/:/usr/share/logstash/pipeline/
+      - ./logstash.d/testdata/:/work/
+    links:
+      - elasticsearch
+    # command: --config.reload.automatic
